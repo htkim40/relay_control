@@ -1,5 +1,6 @@
 import tkinter
 import gpiozero
+import time
 
 
 # gui offsets
@@ -261,6 +262,15 @@ class RelayArrayGUI:
 def init_relay(relayArray=RELAY, state=0):
     for relay in relayArray:
         relay.value = state
+
+def toggle_relay_test(relay):
+    while True:
+        if relay.value == 1:
+            relay.value = 0
+            time.sleep(1)
+        else:
+            relay.value = 0
+            time.sleep(1)
 
 
 def main():
