@@ -255,13 +255,13 @@ class RelayArrayGUI:
                    (float(requestedPeriod),
                     float(requestedDutyCycle),
                     int(requestedNumOfCycles)))
+            self.stopEventHandle[ch] = [0]
             self.relayTaskHandle[ch] = threading.Thread(target=toggle_relay_test,
                                                         args=(RELAY[ch],
                                                         float(requestedPeriod),
                                                         float(requestedDutyCycle),
                                                         int(requestedNumOfCycles),
                                                         self.stopEventHandle[ch]))
-            self.stopEventHandle[ch] = 0
             self.relayTaskHandle[ch].start()
 
     def start_all(self):
@@ -291,7 +291,7 @@ def init_relay(relayArray=RELAY, state=0):
 
 def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle):
     cycle = 0
-    while cycle < requestdCycles and stopEventHandle == 0:
+    while cycle < requestdCycles and stopEventHandle == [0]:
         relay.value = 1
         time.sleep(float(period)*(float(dutyCycle)/100))
         relay.value = 0
@@ -301,7 +301,7 @@ def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle)
         if int(requestdCycles) >= 0:
             cycle += 1
             print("Cycle: %d" % cycle)
-    stopEventHandle = 1
+    stopEventHandle = [1]
 
 def time_relay_test(timeEntryHandle, stopEventHandle):
     startTime = time.time()
