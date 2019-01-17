@@ -28,6 +28,7 @@ class RelayArrayGUI:
 
     def __init__(self, master):
 
+        self.relayTaskHandle = [None for i in range(NUMBER_OF_CHANNELS)]
         self.master = master
         self.master.title("Power Cycling Test UI")
         self.master.geometry("675x420")
@@ -282,6 +283,7 @@ def toggle_relay_test(relay, period, dutyCycle, requestdCycles):
 def main():
 
     tasks = [toggle_relay_test for i in range(NUMBER_OF_CHANNELS)]
+    for task in tasks:
 
     #init_relay()
     #toggle_relay_test(RELAY[0])
