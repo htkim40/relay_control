@@ -257,11 +257,11 @@ class RelayArrayGUI:
                     int(requestedNumOfCycles)))
             self.stopEventHandle[ch] = [0]
             self.relayTaskHandle[ch] = threading.Thread(target=toggle_relay_test,
-                                                        args=(RELAY[ch],
+                                                        args=(ch,RELAY[ch],
                                                         float(requestedPeriod),
                                                         float(requestedDutyCycle),
                                                         int(requestedNumOfCycles),
-                                                        self.stopEventHandle[ch]))
+                                                        self.stopEventHandle))
             self.relayTaskHandle[ch].start()
 
     def start_all(self):
@@ -274,7 +274,7 @@ class RelayArrayGUI:
     def stop(self, channel):
         ch = abs(channel.get()) - 1
         print("Stopping channel %d" % ch)
-        self.stopEventHandle[ch] = 1
+        self.stopEventHandle[ch] = [1]
 
     def stop_all(self):
         stopText = 'Stopping channels: '
@@ -289,9 +289,9 @@ def init_relay(relayArray=RELAY, state=0):
         relay.value = state
 
 
-def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle):
+def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEventHandle):
     cycle = 0
-    while cycle < requestdCycles and stopEventHandle == [0]:
+    while cycle < requestdCycles and stopEventHandle[channel] == [0]:
         relay.value = 1
         time.sleep(float(period)*(float(dutyCycle)/100))
         relay.value = 0
@@ -303,9 +303,9 @@ def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle)
             print("Cycle: %d" % cycle)
     stopEventHandle = [1]
 
-def time_relay_test(timeEntryHandle, stopEventHandle):
+def time_relay_test(channel, timeEntryHandle, stopEventHandle):
     startTime = time.time()
-    while(stopEventHandle == 0):
+    while stopEventHandle[channel] == 0:
         endTime = time.time()
         hours, rem = divmod(endTime - startTime, 3600)
         minutes, seconds = divmod(rem, 60)
