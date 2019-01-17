@@ -1,12 +1,17 @@
 import tkinter
 import gpiozero
 
+
+# gui offsets
 NUMBER_OF_CHANNELS = 8
 OPTIONS_FRAME_OFFSET_X = 15
 OPTIONS_FRAME_OFFSET_Y = 15
 OPTIONS_TO_STATUS_FRAME_OFFSET = 420
 LABEL_OFFSET = 25
 LABEL_TO_ELEMENT_OFFSET = 25
+
+# GPIO to relay map
+RELAY = [0 for i in range(NUMBER_OF_CHANNELS)]
 RELAY[0] = gpiozero.LED(2)  # j8p3
 RELAY[1] = gpiozero.LED(3)  # j8p5
 RELAY[2] = gpiozero.LED(4)  # j8p7
@@ -253,7 +258,13 @@ class RelayArrayGUI:
         print(stopText[0:len(stopText) - 2])
 
 
+def init_relay(relayArray=RELAY, state=0):
+    for relay in relayArray:
+        relay.value = state
+
+
 def main():
+    init_relay()
     gui_root = tkinter.Tk()
     gui_main = RelayArrayGUI(gui_root)
     gui_main.master.mainloop()
