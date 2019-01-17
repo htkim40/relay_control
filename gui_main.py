@@ -29,6 +29,7 @@ class RelayArrayGUI:
     def __init__(self, master):
 
         self.relayTaskHandle = [None for i in range(NUMBER_OF_CHANNELS)]
+        self.timerTaskHandle = [None for i in range(NUMBER_OF_CHANNELS)]
         self.stopEventHandle = [1 for i in range(NUMBER_OF_CHANNELS)]
         self.master = master
         self.master.title("Power Cycling Test UI")
@@ -256,13 +257,21 @@ class RelayArrayGUI:
                     float(requestedDutyCycle),
                     int(requestedNumOfCycles)))
             self.stopEventHandle[ch] = 0
+            self.timerTaskHandle[ch] = threading.Thread(target=relay_test_timer,
+                                                        args=(ch,
+                                                              self.chTestTimeEntries,
+                                                              self.stopEventHandle))
             self.relayTaskHandle[ch] = threading.Thread(target=toggle_relay_test,
-                                                        args=(ch,RELAY[ch],
-                                                        float(requestedPeriod),
-                                                        float(requestedDutyCycle),
-                                                        int(requestedNumOfCycles),
-                                                        self.stopEventHandle))
+                                                        args=(ch,
+                                                              RELAY[ch],
+                                                              float(requestedPeriod),
+                                                              float(requestedDutyCycle),
+                                                              int(requestedNumOfCycles),
+                                                              self.stopEventHandle))
+            self.timerTaskHandle[ch].start()
             self.relayTaskHandle[ch].start()
+
+
 
     def start_all(self):
         startText = 'Starting channels: '
@@ -304,14 +313,14 @@ def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEve
             print("Cycle: %d" % cycle)
     stopEventHandle[channel] = 1
 
-def time_relay_test(channel, timeEntryHandle, stopEventHandle):
+def relay_test_timer(channel, timeEntryHandle, stopEventHandle):
     startTime = time.time()
     while stopEventHandle[channel] == 0:
         endTime = time.time()
         hours, rem = divmod(endTime - startTime, 3600)
         minutes, seconds = divmod(rem, 60)
-        print("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
-
+        timeEntryHandle.set("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+        time.sleep(0.1)
 
 def main():
 
