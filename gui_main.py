@@ -1,6 +1,7 @@
 import tkinter
 import gpiozero
 import time
+import threading
 
 
 # gui offsets
@@ -264,26 +265,29 @@ def init_relay(relayArray=RELAY, state=0):
     for relay in relayArray:
         relay.value = state
 
-def toggle_relay_test(relay):
-    while True:
-        if relay.value == 1:
-            print(relay)
-            print("Setting value to low")
-            relay.value = 0
-        else:
-            print(relay)
-            print("Setting value to high")
-            relay.value = 1
 
-        time.sleep(1)
+def toggle_relay_test(relay, period, dutyCycle, requestdCycles):
+    cycle = 0
+    while cycle < requestdCycles:
+        relay.value = 1
+        time.sleep(float(period)*(float(dutyCycle)/100))
+        relay.value = 0
+        time.sleep(float(period)*(1-(float(dutyCycle)/100)))
+
+        # if the number of cycles is greater than 0, count cycles, otherwise infinite cycles
+        if int(requestdCycles) >= 0:
+            cycle += 1
 
 
 def main():
-    init_relay()
-    toggle_relay_test(RELAY[0])
-    gui_root = tkinter.Tk()
-    gui_main = RelayArrayGUI(gui_root)
-    gui_main.master.mainloop()
+
+    tasks = [toggle_relay_test for i in range(NUMBER_OF_CHANNELS)]
+
+    #init_relay()
+    #toggle_relay_test(RELAY[0])
+    #gui_root = tkinter.Tk()
+    #gui_main = RelayArrayGUI(gui_root)
+    #gui_main.master.mainloop()
 
 
 if __name__ == "__main__":
