@@ -1,4 +1,5 @@
 import tkinter
+import gpiozero
 
 NUMBER_OF_CHANNELS = 8
 OPTIONS_FRAME_OFFSET_X = 15
@@ -6,6 +7,14 @@ OPTIONS_FRAME_OFFSET_Y = 15
 OPTIONS_TO_STATUS_FRAME_OFFSET = 420
 LABEL_OFFSET = 25
 LABEL_TO_ELEMENT_OFFSET = 25
+RELAY[0] = gpiozero.LED(2)  # j8p3
+RELAY[1] = gpiozero.LED(3)  # j8p5
+RELAY[2] = gpiozero.LED(4)  # j8p7
+RELAY[3] = gpiozero.LED(17) # j8p11
+RELAY[4] = gpiozero.LED(27) # j8p13
+RELAY[5] = gpiozero.LED(22) # j8p15
+RELAY[6] = gpiozero.LED(10) # j8p19
+RELAY[7] = gpiozero.LED(9)  # j8p21
 
 
 class RelayArrayGUI:
