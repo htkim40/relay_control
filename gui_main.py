@@ -55,7 +55,7 @@ class RelayArrayGUI:
                                               text="Test Status").place(x=OPTIONS_FRAME_OFFSET_X
                                                                           + OPTIONS_TO_STATUS_FRAME_OFFSET,
                                                                         y=OPTIONS_FRAME_OFFSET_Y,
-                                                                        width=215,
+                                                                        width=220,
                                                                         height=380)
 
         # set up on/off label
