@@ -54,23 +54,29 @@ class relayArrayGUI:
                                         x=OPTIONS_FRAME_OFFSET_X+45)
 
             # set up period entry boxes
-            self.periodEntries.append(tkinter.Entry(self.testOptionFrame).place(y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y
-                                                                                  +LABEL_TO_ELEMENT_OFFSET+i*30,
-                                                                                x=OPTIONS_FRAME_OFFSET_X+80,
-                                                                                width=45))
+            self.periodEntries.append(tkinter.StringVar())
+            tkinter.Entry(self.testOptionFrame,
+                          textvariable=self.periodEntries[i]).place(y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y
+                                                                      +LABEL_TO_ELEMENT_OFFSET+i*30,
+                                                                    x=OPTIONS_FRAME_OFFSET_X+80,
+                                                                    width=45)
 
             # set up duty cycle entry boxes
-            self.dutyCycleEntries.append(tkinter.Entry(self.testOptionFrame).place(y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y
-                                                                                     +LABEL_TO_ELEMENT_OFFSET+i*30,
-                                                                                   x=OPTIONS_FRAME_OFFSET_X+150,
-                                                                                   width=45))
+            self.dutyCycleEntries.append(tkinter.StringVar())
+            tkinter.Entry(self.testOptionFrame,
+                          textvariable=self.dutyCycleEntries[i]).place(y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y
+                                                                         +LABEL_TO_ELEMENT_OFFSET+i*30,
+                                                                       x=OPTIONS_FRAME_OFFSET_X+150,
+                                                                       width=45)
 
             # set up number of cycles entry boxes
-            self.numOfCycleEntries.append(tkinter.Entry(self.testOptionFrame).place(y=LABEL_OFFSET +
-                                                                                      OPTIONS_FRAME_OFFSET_Y
-                                                                                      +LABEL_TO_ELEMENT_OFFSET+i*30,
-                                                                                    x=OPTIONS_FRAME_OFFSET_X+220,
-                                                                                    width=45))
+            self.numOfCycleEntries.append(tkinter.StringVar())
+            tkinter.Entry(self.testOptionFrame,
+                          textvariable=self.numOfCycleEntries).place(y=LABEL_OFFSET +
+                                                                       OPTIONS_FRAME_OFFSET_Y
+                                                                       +LABEL_TO_ELEMENT_OFFSET+i*30,
+                                                                     x=OPTIONS_FRAME_OFFSET_X+220,
+                                                                     width=45)
 
             # set up the channel start buttons
             self.chStartButtons.append(tkinter.Button(self.testOptionFrame,
