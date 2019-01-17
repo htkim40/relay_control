@@ -303,6 +303,14 @@ def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle)
             print("Cycle: %d" % cycle)
     stopEventHandle = 1
 
+def time_relay_test(timeEntryHandle, stopEventHandle):
+    startTime = time.time()
+    while(stopEventHandle == 0):
+        endTime = time.time()
+        hours, rem = divmod(endTime - startTime, 3600)
+        minutes, seconds = divmod(rem, 60)
+        print("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+
 
 def main():
 
