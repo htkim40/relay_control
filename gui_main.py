@@ -223,6 +223,7 @@ class RelayArrayGUI:
         ch = abs(channel.get())-1
         if channel.get() <= 0:
             self.stop(channel)
+
             print("Disabling channel %d"%ch)
             self.chStartButtons[ch].configure(state=tkinter.DISABLED)
             self.chStopButtons[ch].configure(state=tkinter.DISABLED)
@@ -266,15 +267,20 @@ def init_relay(relayArray=RELAY, state=0):
 def toggle_relay_test(relay):
     while True:
         if relay.value == 1:
+            print(relay)
+            print("Setting value to low")
             relay.value = 0
-            time.sleep(1)
         else:
-            relay.value = 0
-            time.sleep(1)
+            print(relay)
+            print("Setting value to high")
+            relay.value = 1
+
+        time.sleep(1)
 
 
 def main():
     init_relay()
+    toggle_relay_test(RELAY[0])
     gui_root = tkinter.Tk()
     gui_main = RelayArrayGUI(gui_root)
     gui_main.master.mainloop()
