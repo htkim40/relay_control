@@ -255,7 +255,7 @@ class RelayArrayGUI:
                    (float(requestedPeriod),
                     float(requestedDutyCycle),
                     int(requestedNumOfCycles)))
-            self.stopEventHandle[ch] = [0]
+            self.stopEventHandle[ch] = 0
             self.relayTaskHandle[ch] = threading.Thread(target=toggle_relay_test,
                                                         args=(ch,RELAY[ch],
                                                         float(requestedPeriod),
@@ -274,12 +274,13 @@ class RelayArrayGUI:
     def stop(self, channel):
         ch = abs(channel.get()) - 1
         print("Stopping channel %d" % ch)
-        self.stopEventHandle[ch] = [1]
+        self.stopEventHandle[ch] = 1
 
     def stop_all(self):
         stopText = 'Stopping channels: '
         for ch in range(NUMBER_OF_CHANNELS):
             if self.enableChButtonVars[ch].get() > 0:
+                self.stop(ch)
                 stopText += "%d, " % (self.enableChButtonVars[ch].get() - 1)
         print(stopText[0:len(stopText) - 2])
 
@@ -291,7 +292,7 @@ def init_relay(relayArray=RELAY, state=0):
 
 def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEventHandle):
     cycle = 0
-    while cycle < requestdCycles and stopEventHandle[channel] == [0]:
+    while cycle < requestdCycles and stopEventHandle[channel] == 0:
         relay.value = 1
         time.sleep(float(period)*(float(dutyCycle)/100))
         relay.value = 0
@@ -301,7 +302,7 @@ def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEve
         if int(requestdCycles) >= 0:
             cycle += 1
             print("Cycle: %d" % cycle)
-    stopEventHandle = [1]
+    stopEventHandle[channel] = 1
 
 def time_relay_test(channel, timeEntryHandle, stopEventHandle):
     startTime = time.time()
