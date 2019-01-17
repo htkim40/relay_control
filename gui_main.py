@@ -319,7 +319,7 @@ def relay_test_timer(channel, timeEntryHandle, stopEventHandle):
         endTime = time.time()
         hours, rem = divmod(endTime - startTime, 3600)
         minutes, seconds = divmod(rem, 60)
-        timeEntryHandle.set("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
+        timeEntryHandle[channel].set("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
         time.sleep(0.1)
 
 def main():
