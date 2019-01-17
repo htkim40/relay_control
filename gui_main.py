@@ -29,6 +29,7 @@ class RelayArrayGUI:
     def __init__(self, master):
 
         self.relayTaskHandle = [None for i in range(NUMBER_OF_CHANNELS)]
+        self.stopEventHandle = [1 for i in range(NUMBER_OF_CHANNELS)]
         self.master = master
         self.master.title("Power Cycling Test UI")
         self.master.geometry("675x420")
@@ -242,6 +243,26 @@ class RelayArrayGUI:
     def start(self, channel):
         ch = abs(channel.get()) - 1
         print("Starting channel %d" % ch)
+        print("Generating test thread")
+        requestedPeriod = self.periodEntries[ch].get()
+        requestedDutyCycle = self.dutyCycleEntries[ch].get()
+        requestedNumOfCycles = self.numOfCycleEntries[ch].get()
+
+        if requestedPeriod == "" or requestedDutyCycle == "" or requestedNumOfCycles == "":
+            print("Error: One or more empty fields")
+        else:
+            print("Period: %f \nDuty Cycle: %f \nRequested Cycles: %d" % 
+                   (float(requestedPeriod),
+                    float(requestedDutyCycle),
+                    int(requestedNumOfCycles)))
+            self.relayTaskHandle[ch] = threading.Thread(target=toggle_relay_test,
+                                                        args=(RELAY[ch],
+                                                        float(requestedPeriod),
+                                                        float(requestedDutyCycle),
+                                                        int(requestedNumOfCycles),
+                                                        self.stopEventHandle[ch]))
+            self.stopEventHandle[ch] = 0
+            self.relayTaskHandle[ch].start()
 
     def start_all(self):
         startText = 'Starting channels: '
@@ -253,6 +274,7 @@ class RelayArrayGUI:
     def stop(self, channel):
         ch = abs(channel.get()) - 1
         print("Stopping channel %d" % ch)
+        self.stopEventHandle[ch] = 1
 
     def stop_all(self):
         stopText = 'Stopping channels: '
@@ -267,9 +289,9 @@ def init_relay(relayArray=RELAY, state=0):
         relay.value = state
 
 
-def toggle_relay_test(relay, period, dutyCycle, requestdCycles):
+def toggle_relay_test(relay, period, dutyCycle, requestdCycles, stopEventHandle):
     cycle = 0
-    while cycle < requestdCycles:
+    while cycle < requestdCycles and stopEventHandle == 0:
         relay.value = 1
         time.sleep(float(period)*(float(dutyCycle)/100))
         relay.value = 0
@@ -278,18 +300,20 @@ def toggle_relay_test(relay, period, dutyCycle, requestdCycles):
         # if the number of cycles is greater than 0, count cycles, otherwise infinite cycles
         if int(requestdCycles) >= 0:
             cycle += 1
+            print("Cycle: %d" % cycle)
+    stopEventHandle = 1
 
 
 def main():
 
-    tasks = [toggle_relay_test for i in range(NUMBER_OF_CHANNELS)]
-    for task in tasks:
+    #tasks = [toggle_relay_test for i in range(NUMBER_OF_CHANNELS)]
+    #for task in tasks:
 
     #init_relay()
     #toggle_relay_test(RELAY[0])
-    #gui_root = tkinter.Tk()
-    #gui_main = RelayArrayGUI(gui_root)
-    #gui_main.master.mainloop()
+    gui_root = tkinter.Tk()
+    gui_main = RelayArrayGUI(gui_root)
+    gui_main.master.mainloop()
 
 
 if __name__ == "__main__":
