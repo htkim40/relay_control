@@ -33,7 +33,7 @@ class RelayArrayGUI:
         self.stopEventHandle = [1 for i in range(NUMBER_OF_CHANNELS)]
         self.master = master
         self.master.title("Power Cycling Test UI")
-        self.master.geometry("675x420")
+        self.master.geometry("740x420")
 
         # set up the options pane
         self.testOptionFrame = tkinter.LabelFrame(self.master,
@@ -58,14 +58,14 @@ class RelayArrayGUI:
         # set up duty cycle label
         self.dutyCycleLabel = tkinter.StringVar()
         tkinter.Label(self.testOptionFrame,
-                      textvariable=self.dutyCycleLabel).place(x=OPTIONS_FRAME_OFFSET_X + 130,
+                      textvariable=self.dutyCycleLabel).place(x=OPTIONS_FRAME_OFFSET_X + 133,
                                                               y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y)
         self.dutyCycleLabel.set("Duty Cycle(%)")
 
         # set up number of cycles label
         self.noOfCyclesLabel = tkinter.StringVar()
         tkinter.Label(self.testOptionFrame,
-                      textvariable=self.noOfCyclesLabel).place(x=OPTIONS_FRAME_OFFSET_X + 215,
+                      textvariable=self.noOfCyclesLabel).place(x=OPTIONS_FRAME_OFFSET_X + 220,
                                                                y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y)
         self.noOfCyclesLabel.set("No. of Cycles")
 
@@ -74,7 +74,7 @@ class RelayArrayGUI:
                                               text="Test Status").place(x=OPTIONS_FRAME_OFFSET_X
                                                                           + OPTIONS_TO_STATUS_FRAME_OFFSET,
                                                                         y=OPTIONS_FRAME_OFFSET_Y,
-                                                                        width=220,
+                                                                        width=290,
                                                                         height=380)
 
         # set up on/off label
@@ -99,8 +99,7 @@ class RelayArrayGUI:
                       textvariable=self.testTimeLabel).place(x=OPTIONS_FRAME_OFFSET_X
                                                                + OPTIONS_TO_STATUS_FRAME_OFFSET + 150,
                                                              y=LABEL_OFFSET+OPTIONS_FRAME_OFFSET_Y)
-        self.testTimeLabel.set("Test Time")
-
+        self.testTimeLabel.set("Test Time(HH:MM:SS)")
         self.enableChButtonVars = []
         self.periodEntries = []
         self.dutyCycleEntries = []
@@ -148,7 +147,7 @@ class RelayArrayGUI:
             # set up number of cycles entry boxes
             self.numOfCycleEntries.append(tkinter.StringVar())
             tkinter.Entry(self.testOptionFrame,
-                          textvariable=self.numOfCycleEntries).place(y=LABEL_OFFSET +
+                          textvariable=self.numOfCycleEntries[i]).place(y=LABEL_OFFSET +
                                                                        OPTIONS_FRAME_OFFSET_Y
                                                                        + LABEL_TO_ELEMENT_OFFSET+i*30,
                                                                      x=OPTIONS_FRAME_OFFSET_X+220,
@@ -203,7 +202,7 @@ class RelayArrayGUI:
                                                + LABEL_TO_ELEMENT_OFFSET + i * 30,
                                              x=OPTIONS_FRAME_OFFSET_X
                                                + OPTIONS_TO_STATUS_FRAME_OFFSET + 155,
-                                             width=45)
+                                             width=115)
 
             self.chTestTimeEntries[i].set("0")
 
@@ -241,8 +240,8 @@ class RelayArrayGUI:
         textHandle.insert(0, text)
         return
 
-    def start(self, channel):
-        ch = abs(channel.get()) - 1
+    def start(self, chEnableHndl):
+        ch = abs(chEnableHndl.get()) - 1
         print("Starting channel %d" % ch)
         print("Generating test thread")
         requestedPeriod = self.periodEntries[ch].get()
@@ -267,7 +266,9 @@ class RelayArrayGUI:
                                                               float(requestedPeriod),
                                                               float(requestedDutyCycle),
                                                               int(requestedNumOfCycles),
-                                                              self.stopEventHandle))
+                                                              self.stopEventHandle,
+                                                              self.chStateEntries,
+                                                              self.chCycleCountEntries))
             self.timerTaskHandle[ch].start()
             self.relayTaskHandle[ch].start()
 
@@ -277,6 +278,7 @@ class RelayArrayGUI:
         startText = 'Starting channels: '
         for ch in range(NUMBER_OF_CHANNELS):
             if self.enableChButtonVars[ch].get() > 0:
+                self.start(self.enableChButtonVars[ch])
                 startText += "%d, " % (self.enableChButtonVars[ch].get()-1)
         print(startText[0:len(startText)-2])
 
@@ -289,7 +291,7 @@ class RelayArrayGUI:
         stopText = 'Stopping channels: '
         for ch in range(NUMBER_OF_CHANNELS):
             if self.enableChButtonVars[ch].get() > 0:
-                self.stop(ch)
+                self.stop(self.enableChButtonVars[ch])
                 stopText += "%d, " % (self.enableChButtonVars[ch].get() - 1)
         print(stopText[0:len(stopText) - 2])
 
@@ -299,18 +301,22 @@ def init_relay(relayArray=RELAY, state=0):
         relay.value = state
 
 
-def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEventHandle):
+def toggle_relay_test(channel, relay, period, dutyCycle, requestdCycles, stopEventHandle, stateTextHandle, cycleTextHandle):
     cycle = 0
+    cycleTextHandle[channel].set(str(cycle))
     while cycle < requestdCycles and stopEventHandle[channel] == 0:
         relay.value = 1
-        time.sleep(float(period)*(float(dutyCycle)/100))
+        stateTextHandle[channel].set("On")
+        polling_wait(float(period)*(float(dutyCycle)/100),stopEventHandle,channel)
         relay.value = 0
-        time.sleep(float(period)*(1-(float(dutyCycle)/100)))
+        stateTextHandle[channel].set("Off")
+        polling_wait(float(period)*(1-(float(dutyCycle)/100)),stopEventHandle,channel)
 
         # if the number of cycles is greater than 0, count cycles, otherwise infinite cycles
-        if int(requestdCycles) >= 0:
+        if int(requestdCycles) >= 0 and stopEventHandle[channel] == 0:
             cycle += 1
             print("Cycle: %d" % cycle)
+            cycleTextHandle[channel].set(str(cycle))
     stopEventHandle[channel] = 1
 
 def relay_test_timer(channel, timeEntryHandle, stopEventHandle):
@@ -321,6 +327,11 @@ def relay_test_timer(channel, timeEntryHandle, stopEventHandle):
         minutes, seconds = divmod(rem, 60)
         timeEntryHandle[channel].set("{:0>5}:{:0>2}:{:05.2f}".format(int(hours), int(minutes), seconds))
         time.sleep(0.1)
+
+def polling_wait(seconds,stopEventHandle,stopIndex):
+    tStart = time.time()
+    while time.time()-tStart < seconds and stopEventHandle[stopIndex] == 0:
+        time.sleep(0.1) 
 
 def main():
 
